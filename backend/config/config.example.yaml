@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  mode: debug
+  jwt_secret: "replace-with-a-secure-random-secret"
+  access_token_expire: 900
+  refresh_token_expire: 604800
+
+database:
+  host: 127.0.0.1
+  port: 3309
+  username: root
+  password: "replace-with-database-password"
+  dbname: zm_project
+  charset: utf8mb4
+  max_idle_conns: 10
+  max_open_conns: 100
+  log_level: info
+
+redis:
+  host: 127.0.0.1
+  port: 7379
+  password: ""
+  db: 0
+  pool_size: 10
+
+log:
+  level: info
+  filename: logs/app.log
+  max_size: 100
+  max_backups: 10
+  max_age: 30
+  compress: true
+
+rate_limit:
+  rate: 100
+  burst: 200
+
+storage:
+  endpoint: "localhost:9000"
+  access_key: "replace-with-storage-access-key"
+  secret_key: "replace-with-storage-secret-key"
+  bucket: "zm-project"
+  use_ssl: false
