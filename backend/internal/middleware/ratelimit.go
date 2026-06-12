@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
-	"zm-project/backend/config"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/config"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 func RateLimit(cfg config.RateLimitConfig) gin.HandlerFunc {

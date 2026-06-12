@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 type FileHandler struct{}

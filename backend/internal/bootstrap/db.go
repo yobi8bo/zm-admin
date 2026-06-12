@@ -6,9 +6,9 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
-	"zm-project/backend/config"
-	"zm-project/backend/internal/model"
-	"zm-project/backend/pkg/logger"
+	"zhanxu-admin/backend/config"
+	"zhanxu-admin/backend/internal/model"
+	"zhanxu-admin/backend/pkg/logger"
 )
 
 var DB *gorm.DB

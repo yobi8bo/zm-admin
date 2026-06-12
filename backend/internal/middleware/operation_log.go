@@ -10,10 +10,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"zm-project/backend/internal/model"
-	"zm-project/backend/internal/repository"
-	"zm-project/backend/pkg/logger"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/internal/model"
+	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/logger"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 const maxOperationLogBodySize = 64 * 1024

@@ -1,4 +1,4 @@
-# ZM 管理系统 — AI 开发规范（CLAUDE.md）
+# 栈序管理平台 — AI 开发规范（CLAUDE.md）
 
 > 本文件是项目 AI 协作开发的强制约束，开发前必须完整阅读。
 
@@ -12,7 +12,7 @@
 |------|------|------|
 | 后端 | `backend/` | Go 服务，监听 :8080 |
 | 前端 | `frontend/` | Vue3 SPA，开发时监听 :3000，通过 Vite proxy 转发 /api |
-| 数据库 | Docker MySQL | host: 127.0.0.1, port: 3309, db: zm_project |
+| 数据库 | Docker MySQL | host: 127.0.0.1, port: 3309, db: zhanxu_admin |
 | 缓存 | Docker Redis | host: 127.0.0.1, port: 7379, 无密码 |
 
 ---

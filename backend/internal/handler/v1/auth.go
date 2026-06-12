@@ -4,10 +4,10 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/internal/dto"
-	"zm-project/backend/internal/middleware"
-	"zm-project/backend/internal/service"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/internal/dto"
+	"zhanxu-admin/backend/internal/middleware"
+	"zhanxu-admin/backend/internal/service"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 type AuthHandler struct {

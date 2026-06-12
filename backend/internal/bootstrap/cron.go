@@ -2,7 +2,7 @@ package bootstrap
 
 import (
 	"github.com/robfig/cron/v3"
-	"zm-project/backend/pkg/logger"
+	"zhanxu-admin/backend/pkg/logger"
 )
 
 var Cron *cron.Cron

@@ -7,14 +7,14 @@ import (
 
 	"github.com/mojocn/base64Captcha"
 	"gorm.io/gorm"
-	"zm-project/backend/config"
-	"zm-project/backend/internal/dto"
-	"zm-project/backend/internal/model"
-	"zm-project/backend/internal/repository"
-	"zm-project/backend/pkg/cache"
-	"zm-project/backend/pkg/crypto"
-	"zm-project/backend/pkg/jwtutil"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/config"
+	"zhanxu-admin/backend/internal/dto"
+	"zhanxu-admin/backend/internal/model"
+	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/cache"
+	"zhanxu-admin/backend/pkg/crypto"
+	"zhanxu-admin/backend/pkg/jwtutil"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 var captchaStore = base64Captcha.DefaultMemStore

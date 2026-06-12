@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/internal/repository"
-	"zm-project/backend/pkg/pagination"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/pagination"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 type LogHandler struct{ logRepo *repository.LogRepo }

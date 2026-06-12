@@ -1,9 +1,9 @@
 package bootstrap
 
 import (
-	"zm-project/backend/config"
-	"zm-project/backend/pkg/cache"
-	"zm-project/backend/pkg/logger"
+	"zhanxu-admin/backend/config"
+	"zhanxu-admin/backend/pkg/cache"
+	"zhanxu-admin/backend/pkg/logger"
 )
 
 func InitRedis(cfg config.RedisConfig) error {

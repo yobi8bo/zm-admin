@@ -4,7 +4,7 @@
     <div class="login-box">
       <div class="login-header">
         <img src="@/assets/logo.svg" class="login-logo" alt="logo" />
-        <h1 class="login-title">ZM 管理系统</h1>
+        <h1 class="login-title">栈序管理平台</h1>
         <p class="login-desc">企业级中后台管理平台</p>
       </div>
 

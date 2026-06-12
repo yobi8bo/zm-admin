@@ -5,8 +5,8 @@ import (
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/pkg/logger"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/pkg/logger"
+	"zhanxu-admin/backend/pkg/response"
 	"go.uber.org/zap"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 func Casbin(enforcer *casbin.Enforcer) gin.HandlerFunc {

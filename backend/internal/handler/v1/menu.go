@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/internal/dto"
-	"zm-project/backend/internal/service"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/internal/dto"
+	"zhanxu-admin/backend/internal/service"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 type MenuHandler struct{ menuSvc *service.MenuService }

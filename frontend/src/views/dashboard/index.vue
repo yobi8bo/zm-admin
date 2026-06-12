@@ -21,7 +21,7 @@
       <a-col :span="24">
         <a-card title="系统信息" :bordered="false">
           <a-descriptions :column="3">
-            <a-descriptions-item label="系统名称">ZM 管理系统</a-descriptions-item>
+            <a-descriptions-item label="系统名称">栈序管理平台</a-descriptions-item>
             <a-descriptions-item label="版本">v1.0.0</a-descriptions-item>
             <a-descriptions-item label="后端框架">Go + Gin</a-descriptions-item>
             <a-descriptions-item label="前端框架">Vue 3 + Ant Design Vue</a-descriptions-item>

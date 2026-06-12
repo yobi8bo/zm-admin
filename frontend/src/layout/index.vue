@@ -11,7 +11,7 @@
     >
       <div class="logo">
         <img src="@/assets/logo.svg" alt="logo" class="logo-img" />
-        <span v-show="!appStore.sidebarCollapsed" class="logo-title">ZM 管理系统</span>
+        <span v-show="!appStore.sidebarCollapsed" class="logo-title">栈序管理平台</span>
       </div>
       <Sidebar />
     </a-layout-sider>

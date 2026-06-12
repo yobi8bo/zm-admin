@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"zm-project/backend/config"
+	"zhanxu-admin/backend/config"
 )
 
 var log *zap.Logger

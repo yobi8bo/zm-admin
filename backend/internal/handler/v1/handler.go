@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"zm-project/backend/internal/service"
-	"zm-project/backend/internal/repository"
+	"zhanxu-admin/backend/internal/service"
+	"zhanxu-admin/backend/internal/repository"
 )
 
 type Handler struct {

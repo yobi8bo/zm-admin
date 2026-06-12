@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/viper"
-	"zm-project/backend/config"
+	"zhanxu-admin/backend/config"
 )
 
 func InitConfig(cfgFile string) (*config.Config, error) {

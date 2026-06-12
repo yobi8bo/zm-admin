@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'zm_access_token'
-const REFRESH_TOKEN_KEY = 'zm_refresh_token'
+const TOKEN_KEY = 'zhanxu_admin_access_token'
+const REFRESH_TOKEN_KEY = 'zhanxu_admin_refresh_token'
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)

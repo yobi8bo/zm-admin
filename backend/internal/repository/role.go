@@ -2,7 +2,7 @@ package repository
 
 import (
 	"gorm.io/gorm"
-	"zm-project/backend/internal/model"
+	"zhanxu-admin/backend/internal/model"
 )
 
 type RoleRepo struct{ db *gorm.DB }

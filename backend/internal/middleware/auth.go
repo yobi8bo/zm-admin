@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/pkg/cache"
-	"zm-project/backend/pkg/jwtutil"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/pkg/cache"
+	"zhanxu-admin/backend/pkg/jwtutil"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 const (

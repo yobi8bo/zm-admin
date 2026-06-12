@@ -3,10 +3,10 @@ package router
 import (
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
-	"zm-project/backend/config"
-	"zm-project/backend/internal/handler/v1"
-	"zm-project/backend/internal/middleware"
-	"zm-project/backend/internal/repository"
+	"zhanxu-admin/backend/config"
+	"zhanxu-admin/backend/internal/handler/v1"
+	"zhanxu-admin/backend/internal/middleware"
+	"zhanxu-admin/backend/internal/repository"
 )
 
 func Init(cfg *config.Config, enforcer *casbin.Enforcer, h *v1.Handler, logRepo *repository.LogRepo) *gin.Engine {

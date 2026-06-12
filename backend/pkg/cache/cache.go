@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"zm-project/backend/config"
+	"zhanxu-admin/backend/config"
 )
 
 var client *redis.Client

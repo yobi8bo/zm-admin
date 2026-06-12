@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"zm-project/backend/pkg/logger"
+	"zhanxu-admin/backend/pkg/logger"
 )
 
 func Logger() gin.HandlerFunc {

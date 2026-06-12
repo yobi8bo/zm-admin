@@ -1,4 +1,4 @@
-module zm-project/backend
+module zhanxu-admin/backend
 
 go 1.24.13
 

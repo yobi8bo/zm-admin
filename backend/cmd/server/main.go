@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"zm-project/backend/internal/bootstrap"
-	v1 "zm-project/backend/internal/handler/v1"
-	"zm-project/backend/internal/repository"
-	"zm-project/backend/internal/router"
-	"zm-project/backend/internal/service"
-	"zm-project/backend/pkg/logger"
+	"zhanxu-admin/backend/internal/bootstrap"
+	v1 "zhanxu-admin/backend/internal/handler/v1"
+	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/internal/router"
+	"zhanxu-admin/backend/internal/service"
+	"zhanxu-admin/backend/pkg/logger"
 )
 
 func main() {

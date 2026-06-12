@@ -6,11 +6,11 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"gorm.io/gorm"
-	"zm-project/backend/internal/dto"
-	"zm-project/backend/internal/model"
-	"zm-project/backend/internal/repository"
-	"zm-project/backend/pkg/crypto"
-	"zm-project/backend/pkg/response"
+	"zhanxu-admin/backend/internal/dto"
+	"zhanxu-admin/backend/internal/model"
+	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/crypto"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 type UserService struct {
