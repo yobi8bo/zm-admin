@@ -231,3 +231,9 @@ backend/config/config.example.yaml
 - 不要提交 `backend/config/config.yaml` 或本地 `.env` 文件。
 - 生产环境必须替换 JWT 密钥、数据库密码和存储凭据。
 - 生产环境应关闭 Gin debug 模式，并通过 HTTPS 对外提供服务。
+
+## 许可证
+
+本项目由 zhang zhenming 创建，基于 [Apache License 2.0](LICENSE) 开源。
+
+Copyright 2026 zhang zhenming
