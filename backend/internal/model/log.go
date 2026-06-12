@@ -1,5 +1,11 @@
 package model
 
+import (
+	"encoding/json"
+
+	"zhanxu-admin/backend/pkg/datetime"
+)
+
 type SysOperationLog struct {
 	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID    uint   `gorm:"not null;default:0;index" json:"user_id"`
@@ -12,13 +18,24 @@ type SysOperationLog struct {
 	Body      string `gorm:"type:text;comment:请求Body" json:"body"`
 	IP        string `gorm:"size:64;not null;default:''" json:"ip"`
 	UserAgent string `gorm:"size:255" json:"user_agent"`
-	Status    int    `gorm:"not null;default:0;comment:HTTP响应码" json:"status"`
+	Status    int    `gorm:"not null;default:0;comment:业务响应码或HTTP状态码" json:"status"`
 	Latency   int64  `gorm:"not null;default:0;comment:耗时ms" json:"latency"`
 	Error     string `gorm:"type:text;comment:错误信息" json:"error"`
 	CreatedAt int64  `gorm:"autoCreateTime:milli" json:"created_at"`
 }
 
 func (SysOperationLog) TableName() string { return "sys_operation_log" }
+
+func (log SysOperationLog) MarshalJSON() ([]byte, error) {
+	type Alias SysOperationLog
+	return json.Marshal(struct {
+		Alias
+		CreatedAt string `json:"created_at"`
+	}{
+		Alias:     Alias(log),
+		CreatedAt: datetime.FormatMillis(log.CreatedAt),
+	})
+}
 
 type SysLoginLog struct {
 	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -34,3 +51,14 @@ type SysLoginLog struct {
 }
 
 func (SysLoginLog) TableName() string { return "sys_login_log" }
+
+func (log SysLoginLog) MarshalJSON() ([]byte, error) {
+	type Alias SysLoginLog
+	return json.Marshal(struct {
+		Alias
+		CreatedAt string `json:"created_at"`
+	}{
+		Alias:     Alias(log),
+		CreatedAt: datetime.FormatMillis(log.CreatedAt),
+	})
+}

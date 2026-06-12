@@ -46,6 +46,8 @@ func OperationLog(logRepo *repository.LogRepo) gin.HandlerFunc {
 		c.Next()
 
 		module, action := operationDescription(c.FullPath(), c.Request.Method)
+		status, operationErr := operationResult(writer.body.Bytes(), c)
+		status = normalizeOperationStatus(status, operationErr)
 		logEntry := &model.SysOperationLog{
 			UserID:    GetUserID(c),
 			Username:  GetUsername(c),
@@ -57,9 +59,9 @@ func OperationLog(logRepo *repository.LogRepo) gin.HandlerFunc {
 			Body:      body,
 			IP:        c.ClientIP(),
 			UserAgent: c.Request.UserAgent(),
-			Status:    c.Writer.Status(),
+			Status:    status,
 			Latency:   time.Since(start).Milliseconds(),
-			Error:     operationError(writer.body.Bytes(), c),
+			Error:     operationErr,
 		}
 		if err := logRepo.CreateOperationLog(logEntry); err != nil {
 			logger.Error("写入操作日志失败", zap.Error(err))
@@ -119,15 +121,29 @@ func redactSensitiveFields(value any) {
 	}
 }
 
-func operationError(data []byte, c *gin.Context) string {
+func operationResult(data []byte, c *gin.Context) (int, string) {
 	if len(c.Errors) > 0 {
-		return c.Errors.String()
+		return response.CodeServerError, c.Errors.String()
 	}
 	var resp response.Response
-	if json.Unmarshal(data, &resp) == nil && resp.Code != response.CodeSuccess {
-		return resp.Msg
+	if json.Unmarshal(data, &resp) == nil && resp.Code != 0 {
+		if resp.Code != response.CodeSuccess {
+			return resp.Code, resp.Msg
+		}
+		return resp.Code, ""
 	}
-	return ""
+	status := c.Writer.Status()
+	if status >= http.StatusBadRequest {
+		return status, http.StatusText(status)
+	}
+	return status, ""
+}
+
+func normalizeOperationStatus(status int, operationErr string) int {
+	if operationErr != "" && status == response.CodeSuccess {
+		return response.CodeServerError
+	}
+	return status
 }
 
 func operationDescription(route, method string) (string, string) {

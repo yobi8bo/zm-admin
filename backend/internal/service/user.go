@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"time"
 
 	"github.com/casbin/casbin/v2"
 	"gorm.io/gorm"
@@ -11,6 +10,7 @@ import (
 	"zhanxu-admin/backend/internal/repository"
 	"zhanxu-admin/backend/pkg/cache"
 	"zhanxu-admin/backend/pkg/crypto"
+	"zhanxu-admin/backend/pkg/datetime"
 	"zhanxu-admin/backend/pkg/response"
 )
 
@@ -93,7 +93,13 @@ func (s *UserService) Create(req *dto.CreateUserReq) error {
 	if u.Status == 0 {
 		u.Status = 1
 	}
-	return s.userRepo.Create(u, req.RoleIDs)
+	if err := s.userRepo.Create(u, req.RoleIDs); err != nil {
+		if errors.Is(err, repository.ErrUsernameExists) {
+			return &BizError{Code: response.CodeUsernameExists}
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *UserService) Update(id uint, req *dto.UpdateUserReq) error {
@@ -291,8 +297,8 @@ func toUserResp(u *model.SysUser) dto.UserResp {
 		Status:    u.Status,
 		IsAdmin:   isAdminUser(u),
 		RoleIDs:   make([]uint, len(u.Roles)),
-		LastLogin: u.LastLogin,
-		CreatedAt: u.CreatedAt,
+		LastLogin: datetime.FormatPointer(u.LastLogin),
+		CreatedAt: datetime.Format(u.CreatedAt),
 	}
 	for i, role := range u.Roles {
 		r.RoleIDs[i] = role.ID
@@ -321,5 +327,3 @@ func buildRouteTree(menus []model.SysMenu, parentID uint) []dto.RouteResp {
 	}
 	return nodes
 }
-
-func toTime(t time.Time) time.Time { return t }

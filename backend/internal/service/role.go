@@ -9,6 +9,7 @@ import (
 	"zhanxu-admin/backend/internal/dto"
 	"zhanxu-admin/backend/internal/model"
 	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/datetime"
 	"zhanxu-admin/backend/pkg/response"
 )
 
@@ -191,7 +192,7 @@ func toRoleResp(r *model.SysRole) dto.RoleResp {
 		Sort:      r.Sort,
 		Status:    r.Status,
 		Remark:    r.Remark,
-		CreatedAt: r.CreatedAt,
+		CreatedAt: datetime.Format(r.CreatedAt),
 	}
 }
 

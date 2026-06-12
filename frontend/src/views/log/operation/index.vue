@@ -20,7 +20,9 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'status'">
-            <a-tag :color="record.status < 400 ? 'success' : 'error'">{{ record.status }}</a-tag>
+            <a-tag :color="isOperationSuccess(record) ? 'success' : 'error'">
+              {{ isOperationSuccess(record) ? '成功' : '失败' }}
+            </a-tag>
           </template>
           <template v-if="column.key === 'latency'">
             {{ record.latency }}ms
@@ -32,7 +34,7 @@
 </template>
 
 <script setup>
-  import { ref, reactive, onMounted } from 'vue'
+  import { ref, reactive, onActivated } from 'vue'
   import { message } from 'ant-design-vue'
   import { logApi } from '@/api/log'
 
@@ -44,13 +46,14 @@
     { title: '用户名', dataIndex: 'username', key: 'username', width: 100 },
     { title: '模块', dataIndex: 'module', key: 'module', width: 100 },
     { title: '操作', dataIndex: 'action', key: 'action', width: 120 },
-    { title: '请求方式', dataIndex: 'method', key: 'method', width: 90 },
-    { title: '请求路径', dataIndex: 'path', key: 'path' },
-    { title: 'IP', dataIndex: 'ip', key: 'ip', width: 130 },
-    { title: '状态', key: 'status', width: 80 },
+    { title: '执行结果', key: 'status', width: 100 },
     { title: '耗时', key: 'latency', width: 80 },
     { title: '时间', dataIndex: 'created_at', key: 'created_at', width: 170 },
   ]
+
+  function isOperationSuccess(record) {
+    return record.status === 200 && !record.error
+  }
 
   async function loadData() {
     loading.value = true
@@ -71,7 +74,7 @@
     loadData()
   }
 
-  onMounted(loadData)
+  onActivated(loadData)
 </script>
 
 <style scoped>

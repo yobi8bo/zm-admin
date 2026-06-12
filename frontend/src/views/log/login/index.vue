@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-  import { ref, reactive, onMounted } from 'vue'
+  import { ref, reactive, onActivated } from 'vue'
   import { message } from 'ant-design-vue'
   import { logApi } from '@/api/log'
 
@@ -68,7 +68,7 @@
     loadData()
   }
 
-  onMounted(loadData)
+  onActivated(loadData)
 </script>
 
 <style scoped>

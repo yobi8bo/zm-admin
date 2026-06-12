@@ -1,7 +1,5 @@
 package dto
 
-import "time"
-
 type UserListReq struct {
 	PageQuery
 	Username string `form:"username"`
@@ -58,18 +56,18 @@ type UpdateMeReq struct {
 }
 
 type UserResp struct {
-	ID        uint       `json:"id"`
-	DeptID    uint       `json:"dept_id"`
-	DeptName  string     `json:"dept_name"`
-	Username  string     `json:"username"`
-	Nickname  string     `json:"nickname"`
-	Avatar    string     `json:"avatar"`
-	Email     string     `json:"email"`
-	Phone     string     `json:"phone"`
-	Gender    int8       `json:"gender"`
-	Status    int8       `json:"status"`
-	IsAdmin   bool       `json:"is_admin"`
-	RoleIDs   []uint     `json:"role_ids"`
-	LastLogin *time.Time `json:"last_login"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        uint    `json:"id"`
+	DeptID    uint    `json:"dept_id"`
+	DeptName  string  `json:"dept_name"`
+	Username  string  `json:"username"`
+	Nickname  string  `json:"nickname"`
+	Avatar    string  `json:"avatar"`
+	Email     string  `json:"email"`
+	Phone     string  `json:"phone"`
+	Gender    int8    `json:"gender"`
+	Status    int8    `json:"status"`
+	IsAdmin   bool    `json:"is_admin"`
+	RoleIDs   []uint  `json:"role_ids"`
+	LastLogin *string `json:"last_login"`
+	CreatedAt string  `json:"created_at"`
 }

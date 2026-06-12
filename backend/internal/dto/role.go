@@ -1,7 +1,5 @@
 package dto
 
-import "time"
-
 type RoleListReq struct {
 	PageQuery
 	Name   string `form:"name"`
@@ -30,11 +28,11 @@ type AssignMenusReq struct {
 }
 
 type RoleResp struct {
-	ID        uint      `json:"id"`
-	Name      string    `json:"name"`
-	Code      string    `json:"code"`
-	Sort      int       `json:"sort"`
-	Status    int8      `json:"status"`
-	Remark    string    `json:"remark"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	Code      string `json:"code"`
+	Sort      int    `json:"sort"`
+	Status    int8   `json:"status"`
+	Remark    string `json:"remark"`
+	CreatedAt string `json:"created_at"`
 }

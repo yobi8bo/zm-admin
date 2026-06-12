@@ -1,11 +1,17 @@
 package repository
 
 import (
+	"errors"
+
+	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"zhanxu-admin/backend/internal/model"
 )
 
 type UserRepo struct{ db *gorm.DB }
+
+var ErrUsernameExists = errors.New("username already exists")
 
 func NewUserRepo(db *gorm.DB) *UserRepo { return &UserRepo{db: db} }
 
@@ -38,18 +44,57 @@ func (r *UserRepo) List(page, pageSize int, where map[string]any) ([]model.SysUs
 
 func (r *UserRepo) Create(u *model.SysUser, roleIDs []uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(u).Error; err != nil {
+		var deleted model.SysUser
+		err := tx.Unscoped().
+			Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("username = ? AND deleted_at IS NOT NULL", u.Username).
+			First(&deleted).Error
+		switch {
+		case err == nil:
+			if err := restoreDeletedUser(tx, &deleted, u); err != nil {
+				return err
+			}
+			u.ID = deleted.ID
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			if err := tx.Create(u).Error; err != nil {
+				if isDuplicateEntry(err) {
+					return ErrUsernameExists
+				}
+				return err
+			}
+		default:
 			return err
 		}
+
+		var roles []model.SysRole
 		if len(roleIDs) > 0 {
-			var roles []model.SysRole
 			if err := tx.Find(&roles, roleIDs).Error; err != nil {
 				return err
 			}
-			return tx.Model(u).Association("Roles").Replace(roles)
 		}
-		return nil
+		return tx.Model(u).Association("Roles").Replace(roles)
 	})
+}
+
+func restoreDeletedUser(tx *gorm.DB, deleted, replacement *model.SysUser) error {
+	return tx.Unscoped().Model(deleted).Updates(map[string]any{
+		"deleted_at": nil,
+		"dept_id":    replacement.DeptID,
+		"nickname":   replacement.Nickname,
+		"password":   replacement.Password,
+		"avatar":     replacement.Avatar,
+		"email":      replacement.Email,
+		"phone":      replacement.Phone,
+		"gender":     replacement.Gender,
+		"status":     replacement.Status,
+		"last_login": nil,
+		"remark":     replacement.Remark,
+	}).Error
+}
+
+func isDuplicateEntry(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
 }
 
 func (r *UserRepo) Update(u *model.SysUser) error {

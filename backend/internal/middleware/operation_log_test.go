@@ -1,8 +1,13 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"zhanxu-admin/backend/pkg/response"
 )
 
 func TestShouldLogOperation(t *testing.T) {
@@ -68,5 +73,63 @@ func TestOperationDescription(t *testing.T) {
 			t.Fatalf("operationDescription(%q, %q) = (%q, %q), want (%q, %q)",
 				tt.route, tt.method, module, action, tt.wantModule, tt.wantAction)
 		}
+	}
+}
+
+func TestOperationResult(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name       string
+		body       string
+		contextErr error
+		httpStatus int
+		wantStatus int
+		wantError  string
+	}{
+		{
+			name:       "business success",
+			body:       `{"code":200,"msg":"success","data":null}`,
+			httpStatus: http.StatusOK,
+			wantStatus: 200,
+		},
+		{
+			name:       "business failure",
+			body:       `{"code":10004,"msg":"用户名已存在","data":null}`,
+			httpStatus: http.StatusOK,
+			wantStatus: 10004,
+			wantError:  "用户名已存在",
+		},
+		{
+			name:       "context error",
+			contextErr: errors.New("unexpected failure"),
+			httpStatus: http.StatusOK,
+			wantStatus: 500,
+			wantError:  "Error #01: unexpected failure\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			recorder.WriteHeader(tt.httpStatus)
+			c, _ := gin.CreateTestContext(recorder)
+			if tt.contextErr != nil {
+				_ = c.Error(tt.contextErr)
+			}
+
+			status, errMsg := operationResult([]byte(tt.body), c)
+			if status != tt.wantStatus || errMsg != tt.wantError {
+				t.Fatalf("operationResult() = (%d, %q), want (%d, %q)",
+					status, errMsg, tt.wantStatus, tt.wantError)
+			}
+		})
+	}
+}
+
+func TestOperationLogStatusFallsBackToFailureWhenErrorExists(t *testing.T) {
+	status := normalizeOperationStatus(response.CodeSuccess, "operation failed")
+	if status != response.CodeServerError {
+		t.Fatalf("status = %d, want %d", status, response.CodeServerError)
 	}
 }
