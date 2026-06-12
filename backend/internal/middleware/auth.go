@@ -24,14 +24,6 @@ func Auth(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
-		// 检查黑名单
-		blacklisted, _ := cache.Exists(context.Background(), cache.BlacklistKey(token))
-		if blacklisted {
-			response.Fail(c, response.CodeTokenInvalid)
-			c.Abort()
-			return
-		}
-
 		claims, err := jwtutil.ParseToken(token, jwtSecret)
 		if err != nil {
 			if err == jwtutil.ErrTokenExpired {
@@ -39,6 +31,23 @@ func Auth(jwtSecret string) gin.HandlerFunc {
 			} else {
 				response.Fail(c, response.CodeTokenInvalid)
 			}
+			c.Abort()
+			return
+		}
+		if claims.Subject != "access" || claims.ID == "" || claims.SessionID == "" {
+			response.Fail(c, response.CodeTokenInvalid)
+			c.Abort()
+			return
+		}
+
+		blacklisted, err := cache.Exists(context.Background(), cache.BlacklistKey(claims.ID))
+		if err != nil {
+			response.ServerError(c)
+			c.Abort()
+			return
+		}
+		if blacklisted {
+			response.Fail(c, response.CodeTokenInvalid)
 			c.Abort()
 			return
 		}

@@ -6,7 +6,8 @@
 
 ## 功能
 
-- JWT 登录、刷新令牌、验证码和退出登录
+- JWT 登录、多端会话、刷新令牌轮换和退出登录
+- Redis 验证码、分布式请求限流、动态菜单和按钮权限缓存
 - 基于 Casbin 的 RBAC 接口权限控制
 - 动态菜单和前端动态路由
 - 用户、角色、菜单和部门管理
@@ -199,6 +200,33 @@ backend/config/config.example.yaml
 | `frontend/.env.production` | 生产环境配置 |
 
 开发环境下，Vite 会将 `/api` 请求代理到 `http://localhost:8080`。
+
+### Redis 业务配置
+
+Redis 配置项：
+
+| 配置项 | 默认值 | 用途 |
+|--------|--------|------|
+| `key_prefix` | `zhanxu-admin:` | Redis Key 项目前缀 |
+| `cache_ttl` | `900` | 菜单和权限缓存有效期，单位秒 |
+| `captcha_expire` | `300` | 验证码有效期，单位秒 |
+| `dial_timeout` | `5` | 连接超时，单位秒 |
+| `read_timeout` | `3` | 读取超时，单位秒 |
+| `write_timeout` | `3` | 写入超时，单位秒 |
+
+`rate_limit` 中的 `login_*`、`captcha_*` 和 `sensitive_*` 分别控制登录、验证码及密码修改接口的独立 Redis 令牌桶。`rate` 表示每秒恢复的令牌数，`burst` 表示可突发请求数。
+
+Redis 当前承担以下业务职责：
+
+- 保存按会话隔离的 Refresh Token，并在刷新时原子轮换。
+- 保存已退出 Access Token 的 JWT ID 黑名单。
+- 保存验证码，支持多实例部署。
+- 缓存用户动态菜单与按钮权限，角色或菜单变更后主动失效。
+- 使用 Redis 令牌桶实现跨实例请求限流。
+
+认证安全数据访问 Redis 失败时请求会失败；菜单和权限缓存访问失败时会自动回源 MySQL。
+
+升级到使用会话 ID 和 JWT ID 的版本后，旧版本签发的 Token 将失效，用户需要重新登录。
 
 ## 权限模型
 

@@ -30,11 +30,17 @@ type DatabaseConfig struct {
 }
 
 type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
-	PoolSize int    `mapstructure:"pool_size"`
+	Host          string `mapstructure:"host"`
+	Port          int    `mapstructure:"port"`
+	Password      string `mapstructure:"password"`
+	DB            int    `mapstructure:"db"`
+	PoolSize      int    `mapstructure:"pool_size"`
+	KeyPrefix     string `mapstructure:"key_prefix"`
+	CacheTTL      int64  `mapstructure:"cache_ttl"`
+	CaptchaExpire int64  `mapstructure:"captcha_expire"`
+	DialTimeout   int64  `mapstructure:"dial_timeout"`
+	ReadTimeout   int64  `mapstructure:"read_timeout"`
+	WriteTimeout  int64  `mapstructure:"write_timeout"`
 }
 
 type LogConfig struct {
@@ -47,8 +53,14 @@ type LogConfig struct {
 }
 
 type RateLimitConfig struct {
-	Rate  float64 `mapstructure:"rate"`
-	Burst int     `mapstructure:"burst"`
+	Rate           float64 `mapstructure:"rate"`
+	Burst          int     `mapstructure:"burst"`
+	LoginRate      float64 `mapstructure:"login_rate"`
+	LoginBurst     int     `mapstructure:"login_burst"`
+	CaptchaRate    float64 `mapstructure:"captcha_rate"`
+	CaptchaBurst   int     `mapstructure:"captcha_burst"`
+	SensitiveRate  float64 `mapstructure:"sensitive_rate"`
+	SensitiveBurst int     `mapstructure:"sensitive_burst"`
 }
 
 type StorageConfig struct {

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/mojocn/base64Captcha"
@@ -17,10 +18,10 @@ import (
 	"zhanxu-admin/backend/pkg/response"
 )
 
-var captchaStore = base64Captcha.DefaultMemStore
+var captchaStore = cache.CaptchaStore{}
 
 type AuthService struct {
-	cfg     *config.Config
+	cfg      *config.Config
 	userRepo *repository.UserRepo
 	logRepo  *repository.LogRepo
 }
@@ -40,9 +41,16 @@ func (s *AuthService) GetCaptcha() (*dto.CaptchaResp, error) {
 }
 
 func (s *AuthService) Login(req *dto.LoginReq, ip, userAgent string) (*dto.LoginResp, error) {
-	// 验证码校验
-	if !captchaStore.Verify(req.CaptchaID, req.CaptchaCode, true) {
-		return nil, errors.New("验证码错误")
+	ctx := context.Background()
+	captchaAnswer, err := cache.GetDelString(ctx, cache.CaptchaKey(req.CaptchaID))
+	if err != nil {
+		if cache.IsNotFound(err) {
+			return nil, &BizError{Code: response.CodeCaptchaInvalid}
+		}
+		return nil, err
+	}
+	if strings.TrimSpace(captchaAnswer) != strings.TrimSpace(req.CaptchaCode) {
+		return nil, &BizError{Code: response.CodeCaptchaInvalid}
 	}
 
 	user, err := s.userRepo.FindByUsername(req.Username)
@@ -64,22 +72,24 @@ func (s *AuthService) Login(req *dto.LoginReq, ip, userAgent string) (*dto.Login
 		return nil, &BizError{Code: response.CodeUserDisabled}
 	}
 
-	accessToken, err := jwtutil.GenerateAccessToken(user.ID, user.Username,
+	sessionID := jwtutil.NewTokenID()
+	accessToken, err := jwtutil.GenerateAccessToken(user.ID, user.Username, sessionID,
 		s.cfg.Server.JwtSecret, s.cfg.Server.AccessTokenExpire)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := jwtutil.GenerateRefreshToken(user.ID, user.Username,
+	refreshToken, err := jwtutil.GenerateRefreshToken(user.ID, user.Username, sessionID,
 		s.cfg.Server.JwtSecret, s.cfg.Server.RefreshTokenExpire)
 	if err != nil {
 		return nil, err
 	}
 
 	// 存储 refresh token 到 Redis
-	ctx := context.Background()
 	ttl := time.Duration(s.cfg.Server.RefreshTokenExpire) * time.Second
-	_ = cache.Set(ctx, cache.RefreshTokenKey(user.ID), refreshToken, ttl)
+	if err := cache.Set(ctx, cache.RefreshTokenKey(user.ID, sessionID), refreshToken, ttl); err != nil {
+		return nil, err
+	}
 
 	_ = s.userRepo.UpdateLastLogin(user.ID)
 	s.saveLoginLog(user.ID, user.Username, ip, userAgent, 1, "")
@@ -93,12 +103,20 @@ func (s *AuthService) Login(req *dto.LoginReq, ip, userAgent string) (*dto.Login
 
 func (s *AuthService) Logout(userID uint, token string) error {
 	ctx := context.Background()
-	// 将 access token 加入黑名单（剩余有效期内）
-	_ = cache.Set(ctx, cache.BlacklistKey(token), 1,
-		time.Duration(s.cfg.Server.AccessTokenExpire)*time.Second)
-	// 删除 refresh token
-	_ = cache.Del(ctx, cache.RefreshTokenKey(userID))
-	return nil
+	ttl := time.Duration(s.cfg.Server.AccessTokenExpire) * time.Second
+	claims, err := jwtutil.ParseToken(token, s.cfg.Server.JwtSecret)
+	if err != nil || claims.Subject != "access" {
+		return jwtutil.ErrTokenInvalid
+	}
+	if claims.ExpiresAt != nil {
+		ttl = time.Until(claims.ExpiresAt.Time)
+	}
+	if ttl > 0 {
+		if err := cache.Set(ctx, cache.BlacklistKey(claims.ID), 1, ttl); err != nil {
+			return err
+		}
+	}
+	return cache.Del(ctx, cache.RefreshTokenKey(userID, claims.SessionID))
 }
 
 func (s *AuthService) RefreshToken(req *dto.RefreshTokenReq) (*dto.LoginResp, error) {
@@ -109,36 +127,60 @@ func (s *AuthService) RefreshToken(req *dto.RefreshTokenReq) (*dto.LoginResp, er
 	if claims.Subject != "refresh" {
 		return nil, &BizError{Code: response.CodeRefreshTokenInvalid}
 	}
-
-	// 验证 Redis 中是否存在
-	ctx := context.Background()
-	stored, err := cache.GetString(ctx, cache.RefreshTokenKey(claims.UserID))
-	if err != nil || stored != req.RefreshToken {
+	if claims.ID == "" || claims.SessionID == "" {
 		return nil, &BizError{Code: response.CodeRefreshTokenInvalid}
 	}
 
-	accessToken, err := jwtutil.GenerateAccessToken(claims.UserID, claims.Username,
+	// 验证 Redis 中是否存在
+	ctx := context.Background()
+	key := cache.RefreshTokenKey(claims.UserID, claims.SessionID)
+	stored, err := cache.GetString(ctx, key)
+	if err != nil {
+		if cache.IsNotFound(err) {
+			return nil, &BizError{Code: response.CodeRefreshTokenInvalid}
+		}
+		return nil, err
+	}
+	if stored != req.RefreshToken {
+		return nil, &BizError{Code: response.CodeRefreshTokenInvalid}
+	}
+
+	accessToken, err := jwtutil.GenerateAccessToken(claims.UserID, claims.Username, claims.SessionID,
 		s.cfg.Server.JwtSecret, s.cfg.Server.AccessTokenExpire)
 	if err != nil {
 		return nil, err
 	}
 
+	refreshToken, err := jwtutil.GenerateRefreshToken(claims.UserID, claims.Username, claims.SessionID,
+		s.cfg.Server.JwtSecret, s.cfg.Server.RefreshTokenExpire)
+	if err != nil {
+		return nil, err
+	}
+	ttl := time.Duration(s.cfg.Server.RefreshTokenExpire) * time.Second
+	rotated, err := cache.RotateValue(ctx, key, req.RefreshToken, refreshToken, ttl)
+	if err != nil {
+		return nil, err
+	}
+	if !rotated {
+		return nil, &BizError{Code: response.CodeRefreshTokenInvalid}
+	}
+
 	return &dto.LoginResp{
 		AccessToken:  accessToken,
-		RefreshToken: req.RefreshToken,
+		RefreshToken: refreshToken,
 		ExpiresIn:    s.cfg.Server.AccessTokenExpire,
 	}, nil
 }
 
 func (s *AuthService) saveLoginLog(userID uint, username, ip, userAgent string, status int8, msg string) {
 	_ = s.logRepo.CreateLoginLog(&model.SysLoginLog{
-		UserID:    userID,
-		Username:  username,
-		IP:        ip,
-		Browser:   parseBrowser(userAgent),
-		OS:        parseOS(userAgent),
-		Status:    status,
-		Message:   msg,
+		UserID:   userID,
+		Username: username,
+		IP:       ip,
+		Browser:  parseBrowser(userAgent),
+		OS:       parseOS(userAgent),
+		Status:   status,
+		Message:  msg,
 	})
 }
 

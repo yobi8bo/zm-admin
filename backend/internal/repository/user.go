@@ -94,8 +94,11 @@ func (r *UserRepo) GetRoleIDs(userID uint) ([]uint, error) {
 		return nil, err
 	}
 	ids := make([]uint, len(user.Roles))
-	for i, r := range user.Roles {
-		ids[i] = r.ID
+	ids = ids[:0]
+	for _, role := range user.Roles {
+		if role.Status == 1 {
+			ids = append(ids, role.ID)
+		}
 	}
 	return ids, nil
 }

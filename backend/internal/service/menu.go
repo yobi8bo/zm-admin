@@ -57,7 +57,11 @@ func (s *MenuService) Create(req *dto.CreateMenuReq) error {
 	if m.Visible == 0 {
 		m.Visible = 1
 	}
-	return s.menuRepo.Create(m)
+	if err := s.menuRepo.Create(m); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
 }
 
 func (s *MenuService) Update(id uint, req *dto.UpdateMenuReq) error {
@@ -78,7 +82,11 @@ func (s *MenuService) Update(id uint, req *dto.UpdateMenuReq) error {
 	m.Sort = req.Sort
 	m.Visible = req.Visible
 	m.Status = req.Status
-	return s.menuRepo.Update(m)
+	if err := s.menuRepo.Update(m); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
 }
 
 func (s *MenuService) Delete(id uint) error {
@@ -95,7 +103,11 @@ func (s *MenuService) Delete(id uint) error {
 	if hasChildren {
 		return &BizError{Code: response.CodeMenuHasChildren}
 	}
-	return s.menuRepo.Delete(id)
+	if err := s.menuRepo.Delete(id); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
 }
 
 func toMenuResp(m *model.SysMenu) dto.MenuResp {

@@ -109,15 +109,23 @@ func (s *RoleService) Update(id uint, req *dto.UpdateRoleReq) error {
 	role.Sort = req.Sort
 	role.Status = req.Status
 	role.Remark = req.Remark
-	return s.roleRepo.Update(role)
+	if err := s.roleRepo.Update(role); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
 }
 
 func (s *RoleService) Delete(id uint) error {
-	if _, err := s.roleRepo.FindByID(id); err != nil {
+	role, err := s.roleRepo.FindByID(id)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &BizError{Code: response.CodeRoleNotFound}
 		}
 		return err
+	}
+	if isAdminRole(role) {
+		return &BizError{Code: response.CodeAdminRoleDeleteProtected}
 	}
 	hasUsers, err := s.roleRepo.HasUsers(id)
 	if err != nil {
@@ -126,7 +134,15 @@ func (s *RoleService) Delete(id uint) error {
 	if hasUsers {
 		return &BizError{Code: response.CodeRoleInUse}
 	}
-	return s.roleRepo.Delete(id)
+	if err := s.roleRepo.Delete(id); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
+}
+
+func isAdminRole(role *model.SysRole) bool {
+	return role.Code == "admin"
 }
 
 func (s *RoleService) UpdateStatus(id uint, req *dto.UpdateStatusReq) error {
@@ -138,7 +154,11 @@ func (s *RoleService) UpdateStatus(id uint, req *dto.UpdateStatusReq) error {
 		return err
 	}
 	role.Status = req.Status
-	return s.roleRepo.Update(role)
+	if err := s.roleRepo.Update(role); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
+	return nil
 }
 
 func (s *RoleService) AssignMenus(id uint, req *dto.AssignMenusReq) error {
@@ -152,7 +172,10 @@ func (s *RoleService) AssignMenus(id uint, req *dto.AssignMenusReq) error {
 		return err
 	}
 	// 同步更新 Casbin 权限策略（此处简化，实际按菜单permission字段同步接口权限）
-	_ = s.enforcer.LoadPolicy()
+	if err := s.enforcer.LoadPolicy(); err != nil {
+		return err
+	}
+	invalidateAllAuthorizationCache()
 	return nil
 }
 

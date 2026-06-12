@@ -23,9 +23,15 @@ func Init(cfg *config.Config, enforcer *casbin.Enforcer, h *v1.Handler, logRepo 
 	// 公开路由（无需鉴权）
 	public := r.Group("/api/v1")
 	{
-		public.POST("/auth/login", h.Auth.Login)
+		public.POST("/auth/login",
+			middleware.RateLimitByIP("login", cfg.RateLimit.LoginRate, cfg.RateLimit.LoginBurst),
+			h.Auth.Login,
+		)
 		public.POST("/auth/refresh", h.Auth.RefreshToken)
-		public.GET("/auth/captcha", h.Auth.GetCaptcha)
+		public.GET("/auth/captcha",
+			middleware.RateLimitByIP("captcha", cfg.RateLimit.CaptchaRate, cfg.RateLimit.CaptchaBurst),
+			h.Auth.GetCaptcha,
+		)
 	}
 
 	// 需要鉴权的路由
@@ -37,7 +43,10 @@ func Init(cfg *config.Config, enforcer *casbin.Enforcer, h *v1.Handler, logRepo 
 		// 当前用户
 		authed.GET("/user/me", h.User.GetMe)
 		authed.PUT("/user/me", h.User.UpdateMe)
-		authed.PUT("/user/me/password", h.User.UpdateMyPassword)
+		authed.PUT("/user/me/password",
+			middleware.RateLimitByIP("password", cfg.RateLimit.SensitiveRate, cfg.RateLimit.SensitiveBurst),
+			h.User.UpdateMyPassword,
+		)
 		authed.GET("/user/me/menus", h.User.GetMyMenus)
 		authed.GET("/user/me/permissions", h.User.GetMyPermissions)
 
@@ -52,7 +61,10 @@ func Init(cfg *config.Config, enforcer *casbin.Enforcer, h *v1.Handler, logRepo 
 			permRoutes.PUT("/users/:id", h.User.Update)
 			permRoutes.DELETE("/users/:id", h.User.Delete)
 			permRoutes.PUT("/users/:id/status", h.User.UpdateStatus)
-			permRoutes.PUT("/users/:id/password", h.User.ResetPassword)
+			permRoutes.PUT("/users/:id/password",
+				middleware.RateLimitByIP("password", cfg.RateLimit.SensitiveRate, cfg.RateLimit.SensitiveBurst),
+				h.User.ResetPassword,
+			)
 			permRoutes.PUT("/users/:id/roles", h.User.AssignRoles)
 
 			// 角色管理

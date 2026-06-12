@@ -48,7 +48,7 @@
             <a-space size="small">
               <a-button type="link" size="small" @click="handleEdit(record)">编辑</a-button>
               <a-button type="link" size="small" @click="handleAssignMenus(record)">菜单权限</a-button>
-              <a-popconfirm title="确定删除该角色吗？" @confirm="handleDelete(record.id)">
+              <a-popconfirm v-if="record.code !== 'admin'" title="确定删除该角色吗？" @confirm="handleDelete(record.id)">
                 <a-button type="link" size="small" danger>删除</a-button>
               </a-popconfirm>
             </a-space>

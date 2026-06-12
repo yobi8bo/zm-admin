@@ -50,7 +50,8 @@ func (r *MenuRepo) FindByRoleIDs(roleIDs []uint) ([]model.SysMenu, error) {
 	var menus []model.SysMenu
 	err := r.db.
 		Joins("JOIN sys_role_menu ON sys_role_menu.sys_menu_id = sys_menu.id").
-		Where("sys_role_menu.sys_role_id IN ? AND sys_menu.status = 1", roleIDs).
+		Joins("JOIN sys_role ON sys_role.id = sys_role_menu.sys_role_id").
+		Where("sys_role_menu.sys_role_id IN ? AND sys_role.status = 1 AND sys_role.deleted_at IS NULL AND sys_menu.status = 1", roleIDs).
 		Order("sys_menu.sort ASC").
 		Distinct().
 		Find(&menus).Error

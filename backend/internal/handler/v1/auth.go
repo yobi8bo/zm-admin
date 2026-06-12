@@ -41,7 +41,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			response.Fail(c, bizErr.Code)
 			return
 		}
-		response.FailWithMsg(c, response.CodeBadRequest, err.Error())
+		response.ServerError(c)
 		return
 	}
 	response.Success(c, resp)
@@ -50,7 +50,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) Logout(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	token := extractBearerToken(c)
-	_ = h.authSvc.Logout(userID, token)
+	if err := h.authSvc.Logout(userID, token); err != nil {
+		response.ServerError(c)
+		return
+	}
 	response.Success(c, nil)
 }
 

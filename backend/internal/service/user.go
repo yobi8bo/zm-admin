@@ -9,6 +9,7 @@ import (
 	"zhanxu-admin/backend/internal/dto"
 	"zhanxu-admin/backend/internal/model"
 	"zhanxu-admin/backend/internal/repository"
+	"zhanxu-admin/backend/pkg/cache"
 	"zhanxu-admin/backend/pkg/crypto"
 	"zhanxu-admin/backend/pkg/response"
 )
@@ -123,7 +124,11 @@ func (s *UserService) Delete(id uint) error {
 	if isAdminUser(u) {
 		return &BizError{Code: response.CodeAdminUserProtected}
 	}
-	return s.userRepo.Delete(id)
+	if err := s.userRepo.Delete(id); err != nil {
+		return err
+	}
+	invalidateUserAuthorizationCache(id)
+	return nil
 }
 
 func isAdminUser(u *model.SysUser) bool {
@@ -147,7 +152,11 @@ func (s *UserService) UpdateStatus(id uint, req *dto.UpdateStatusReq) error {
 		return err
 	}
 	u.Status = req.Status
-	return s.userRepo.Update(u)
+	if err := s.userRepo.Update(u); err != nil {
+		return err
+	}
+	invalidateUserAuthorizationCache(id)
+	return nil
 }
 
 func (s *UserService) ResetPassword(id uint, req *dto.ResetPasswordReq) error {
@@ -177,7 +186,11 @@ func (s *UserService) AssignRoles(id uint, req *dto.AssignRolesReq) error {
 	if isAdminUser(u) {
 		return &BizError{Code: response.CodeAdminRoleProtected}
 	}
-	return s.userRepo.AssignRoles(id, req.RoleIDs)
+	if err := s.userRepo.AssignRoles(id, req.RoleIDs); err != nil {
+		return err
+	}
+	invalidateUserAuthorizationCache(id)
+	return nil
 }
 
 func (s *UserService) GetMe(id uint) (*dto.UserResp, error) {
@@ -218,6 +231,10 @@ func (s *UserService) UpdateMyPassword(id uint, req *dto.UpdateMyPasswordReq) er
 }
 
 func (s *UserService) GetMyMenus(userID uint) ([]dto.RouteResp, error) {
+	var cached []dto.RouteResp
+	if getAuthorizationCache(cache.UserMenusKey(userID), &cached) {
+		return cached, nil
+	}
 	roleIDs, err := s.userRepo.GetRoleIDs(userID)
 	if err != nil {
 		return nil, err
@@ -233,10 +250,16 @@ func (s *UserService) GetMyMenus(userID uint) ([]dto.RouteResp, error) {
 			routes = append(routes, m)
 		}
 	}
-	return buildRouteTree(routes, 0), nil
+	result := buildRouteTree(routes, 0)
+	setAuthorizationCache(cache.UserMenusKey(userID), result)
+	return result, nil
 }
 
 func (s *UserService) GetMyPermissions(userID uint) ([]string, error) {
+	var cached []string
+	if getAuthorizationCache(cache.UserPermissionsKey(userID), &cached) {
+		return cached, nil
+	}
 	roleIDs, err := s.userRepo.GetRoleIDs(userID)
 	if err != nil {
 		return nil, err
@@ -251,6 +274,7 @@ func (s *UserService) GetMyPermissions(userID uint) ([]string, error) {
 			perms = append(perms, m.Permission)
 		}
 	}
+	setAuthorizationCache(cache.UserPermissionsKey(userID), perms)
 	return perms, nil
 }
 

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { message } from 'ant-design-vue'
-import { getToken, setToken, getRefreshToken, clearAuth } from './auth'
+import { getToken, setToken, setRefreshToken, getRefreshToken, clearAuth } from './auth'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE,
@@ -75,8 +75,9 @@ async function handleTokenExpired(originalConfig) {
     const res = await axios.post(`${import.meta.env.VITE_API_BASE}/auth/refresh`, {
       refresh_token: refreshToken,
     })
-    const { access_token } = res.data.data
+    const { access_token, refresh_token } = res.data.data
     setToken(access_token)
+    setRefreshToken(refresh_token)
     processQueue(null, access_token)
     originalConfig.headers.Authorization = `Bearer ${access_token}`
     return request(originalConfig)

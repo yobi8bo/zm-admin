@@ -22,6 +22,12 @@ redis:
   password: ""
   db: 0
   pool_size: 10
+  key_prefix: "zhanxu-admin:"
+  cache_ttl: 900
+  captcha_expire: 300
+  dial_timeout: 5
+  read_timeout: 3
+  write_timeout: 3
 
 log:
   level: info
@@ -34,6 +40,12 @@ log:
 rate_limit:
   rate: 100
   burst: 200
+  login_rate: 0.1
+  login_burst: 5
+  captcha_rate: 0.2
+  captcha_burst: 10
+  sensitive_rate: 0.1
+  sensitive_burst: 5
 
 storage:
   endpoint: "localhost:9000"
