@@ -266,8 +266,12 @@ func toUserResp(u *model.SysUser) dto.UserResp {
 		Gender:    u.Gender,
 		Status:    u.Status,
 		IsAdmin:   isAdminUser(u),
+		RoleIDs:   make([]uint, len(u.Roles)),
 		LastLogin: u.LastLogin,
 		CreatedAt: u.CreatedAt,
+	}
+	for i, role := range u.Roles {
+		r.RoleIDs[i] = role.ID
 	}
 	if u.Dept != nil {
 		r.DeptName = u.Dept.Name

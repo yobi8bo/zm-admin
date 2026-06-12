@@ -69,6 +69,7 @@ type UserResp struct {
 	Gender    int8       `json:"gender"`
 	Status    int8       `json:"status"`
 	IsAdmin   bool       `json:"is_admin"`
+	RoleIDs   []uint     `json:"role_ids"`
 	LastLogin *time.Time `json:"last_login"`
 	CreatedAt time.Time  `json:"created_at"`
 }

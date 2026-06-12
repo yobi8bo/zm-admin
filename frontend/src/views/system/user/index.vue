@@ -313,7 +313,7 @@
     await loadAllRoles()
     // 获取当前用户已有角色
     const data = await userApi.get(record.id)
-    selectedRoles.value = (data.roles || []).map((r) => r.id)
+    selectedRoles.value = data.role_ids || []
     roleModalVisible.value = true
   }
 

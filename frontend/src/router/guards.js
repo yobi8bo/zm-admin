@@ -24,8 +24,9 @@ router.beforeEach(async (to) => {
     try {
       await Promise.all([userStore.fetchUserInfo(), userStore.fetchPermissions()])
       await menuStore.generateRoutes()
-      // 动态路由注册后重新导航，确保路由匹配
-      return { ...to, replace: true }
+      // 初次刷新动态页面时，to.name 可能已经被匹配为 NotFound。
+      // 仅使用原始 URL 重新导航，确保新注册的动态路由重新参与匹配。
+      return { path: to.fullPath, replace: true }
     } catch {
       const authStore = useAuthStore()
       await authStore.logout()
